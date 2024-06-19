@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Package List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #d7d4d4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .delete-button {
+            background-color: #ff0000;
+            color: #fff;
+        }
+    </style>
+    <script>
+        function showUploadDialog() {
+            var uploadDialog = document.createElement('input');
+            uploadDialog.type = 'file';
+            uploadDialog.accept = '.deb';
+            uploadDialog.onchange = function(event) {
+                handleUpload(event.target.files);
+            };
+            uploadDialog.click();
+        }
+
+        function handleUpload(files) {
+            if (files.length === 0) {
+                return;
+            }
+
+            var file = files[0];
+            var extension = file.name.split('.').pop().toLowerCase();
+            if (extension !== 'deb') {
+                alert('Please upload a .deb file.');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', file);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert('Upload successful!');
+                    location.reload();  // 刷新页面
+                } else {
+                    alert('Upload failed. Please try again.');
+                }
+            };
+            xhr.send(formData);
+        }
+
+        function refreshList() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/list/refresh', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert('List refreshed!');
+                    location.reload();  // 刷新页面
+                } else {
+                    alert('Failed to refresh list. Please try again.');
+                }
+            };
+            xhr.send();
+        }
+
+        function confirmDelete(packageName) {
+            if (confirm('Are you sure you want to delete ' + packageName + '?')) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/delete/' + packageName, true);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        alert('Delete successful!');
+                        location.reload();  // 刷新页面
+                    } else {
+                        alert('Delete failed. Please try again.');
+                    }
+                };
+                xhr.send();
+            }
+        }
+    </script>
+</head>
+<body>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    <h1>Package List</h1>
+    <button id="addButton" onclick="showUploadDialog()">Add</button>
+    <button id="refreshButton" onclick="refreshList()">Refresh</button>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Version</th>
+            <th>Filename</th>
+            <th>Size</th>
+            <th>Section</th>
+            <th>Action</th>
+        </tr>
+        {% for package in packages|sort(attribute='section') %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td><a href="{{ url_for('package_details', name=package.name) }}">{{ package.name }}</a></td>
+            <td>{{ package.version }}</td>
+            <td>{{ package.filename }}</td>
+            <td>{{ package.size }}</td>
+            <td>{{ package.section }}</td>
+            <td>
+                <div class="button-group">
+                    <button class="delete-button" onclick="confirmDelete('{{ package.name }}')">Delete</button>
+                    <form action="{{ url_for('package_details', name=package.name) }}">
+                        <button type="submit">Edit</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+

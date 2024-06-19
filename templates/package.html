@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Package Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .header {
+            background-color: #f2f2f2;
+            padding: 10px;
+        }
+
+        .content {
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .edit-area {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        h3 {
+            color: #666;
+            margin-top: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        a {
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+    <script>
+        function showSuccessAlert() {
+            alert("修改成功");
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Package Details</h1>
+        <a href="{{ url_for('list_packages') }}">返回列表</a>
+    </div>
+    <div class="content">
+        <h2>{{ package.name }}</h2>
+        <h3></h3>
+        <ul>
+            <li><strong>Section:</strong> {{ package.section }}</li>
+            <li><strong>Version:</strong> {{ package.version }}</li>
+            <li><strong>Depends:</strong> {{ package.depends }}</li>
+            <li><strong>Filename:</strong> {{ package.filename }}</li>
+            <li><strong>Homepage:</strong> {{ package.homepage }}</li>
+            <li><strong>Description:</strong> {{ package.description }}</li>
+        </ul>
+    </div>
+    <div class="edit-area">
+        <form action="{{ url_for('edit_package', name=package.name) }}" method="POST" onsubmit="showSuccessAlert()">
+            <label for="section">Section:</label>
+            <input type="text" name="section" id="section" value="{{ package.section }}"><br>
+            <label for="homepage">Homepage:</label>
+            <input type="text" name="homepage" id="homepage" value="{{ package.homepage }}"><br>
+            <label for="description">Description:</label>
+            <textarea name="description" id="description" rows="4" cols="50">{{ package.description }}</textarea><br>
+            <input type="hidden" name="original_package" value="{{ package.filename }}">
+            <input type="submit" value="Save">
+        </form>
+    </div>
+    <script>
+        // 获取URL参数值
+        function getURLParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // 检查URL参数是否包含success=true
+        function checkSuccessParameter() {
+            var success = getURLParameter('success');
+            if (success === 'true') {
+                showSuccessAlert();
+            }
+        }
+
+        // 页面加载完成后执行检查
+        window.onload = checkSuccessParameter;
+    </script>
+</body>
+</html>
+
